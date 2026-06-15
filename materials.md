@@ -5,6 +5,12 @@
 ## Теория
 ### Стандарт
   - [статья о 17 на хабре](https://habr.com/ru/companies/jugru/articles/663220/)
+### Статьи с хабра про основные темы с собесов
+  - [многопоточка](https://habr.com/ru/articles/966892/)
+  - [Spring](https://habr.com/ru/articles/967632/)
+  - [JVM + memory](https://habr.com/ru/articles/967190/)
+  - [DataBase](https://habr.com/ru/articles/968532/)
+  - [Kafka](https://habr.com/ru/articles/968844/)
 
 ## Советы по интервью от банков
 ### T-bank
