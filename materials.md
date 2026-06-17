@@ -17,4 +17,4 @@
   - [статья от Т-банка](https://www.tbank.ru/career/it/interview/java/)
 
 ### Сбер
-  - [статья от Сбера]()
+  - [статья от Сбера](https://developers.sber.ru/kak-v-sbere/interview/java-developer)
