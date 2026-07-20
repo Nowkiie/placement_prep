@@ -5,6 +5,8 @@
 ## Теория
 ### Стандарт
   - [статья о 17 на хабре](https://habr.com/ru/companies/jugru/articles/663220/)
+### Spring Guides
+  - [official guides](https://spring.io/guides)
 ### Статьи с хабра про основные темы с собесов
   - [многопоточка](https://habr.com/ru/articles/966892/)
   - [Spring](https://habr.com/ru/articles/967632/)
