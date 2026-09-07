@@ -1,4 +1,4 @@
 # placement_prep
 materials for placemenet prep
 
-(Самописная теория)[]
+[Самописнная теория](https://github.com/Nowkiie/placement_prep/blob/develop/theory.md)
