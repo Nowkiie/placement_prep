@@ -228,7 +228,212 @@ String s3 = new String("java"); // новый объект в куче
 - **Type erasure** — стирание типов во время компиляции, информация о generic-типах недоступна в runtime.
 - **Bridge-методы** — генерируются компилятором для сохранения полиморфизма после erasure.
 
+### Wildcard (`?`)
+
+- **Назначение:** позволяет выполнять действия с объектами на основе иерархии классов.
+
+#### Ковариантность: `? extends <class name>`
+- Любой класс, который является наследником указанного.
+- Позволяет **только читать** элементы.
+- Добавление может привести к проблемам с типобезопасностью.
+- **Producer Extends** — производитель производит, вы только берёте.
+- *Аналогия:* конвейер на заводе — производитель кладёт на ленту, вы ничего своего положить туда не можете.
+
+#### Контравариантность: `? super <class name>`
+- Любой класс, который является родителем указанного.
+- Позволяет **только записывать** объекты.
+- Прочитать нельзя — непонятно, есть ли те свойства, к которым обращаются.
+- **Consumer Super** — покупатель потребляет, вы просто складываете всё туда.
+- *Аналогия:* мусорный бак — просто кидаем туда всё без разбора.
+
+### Type Erasure (стирание типов)
+
+- На уровне виртуальной машины нет никаких обобщённых типов — всё приводится к обычным классам.
+- На этапе компиляции типы удаляются и заменяются на `Object`, если нет ограничений.
+
+```java
+class Person<T> {
+    private T id;
+    private String name;
+    T getId() { return id; }
+    String getName() { return name; }
+    Person(T id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+}
+```
+
+После компиляции:
+
+```java
+class Person {
+    private Object id;
+    private String name;
+    Object getId() { return id; }
+    String getName() { return name; }
+    Person(Object id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+}
+```
+
+Или на другой класс, если есть ограничения:
+
+```java
+class Message {
+    private String text;
+    String getText() { return text; }
+    Message(String text) { this.text = text; }
+}
+
+class Messenger<T extends Message> {
+    private T message;
+    T getMessage() { return this.message; }
+    Messenger(T message) { this.message = message; }
+    void send() {
+        System.out.println("Отправляется сообщение: " + message.getText());
+    }
+}
+```
+
+После компиляции:
+
+```java
+class Messenger {
+    private Message message;
+    Message getMessage() { return this.message; }
+    Messenger(Message message) { this.message = message; }
+    void send() {
+        System.out.println("Отправляется сообщение: " + message.getText());
+    }
+}
+```
+
+Если несколько ограничений — стирание идёт до **первого** указанного:
+
+```java
+class Messenger<T extends Message & Printable> {
+    void sendMessage(T message) {
+        message.print();
+    }
+}
+
+interface Printable { void print(); }
+
+class Message {
+    private String text;
+    String getText() { return text; }
+    Message(String text) { this.text = text; }
+}
+```
+
+После компиляции:
+
+```java
+class Messenger {
+    void sendMessage(Message message) {
+        ((Printable) message).print();
+    }
+}
+```
+
+**Последствия type erasure:**
+1. Нельзя узнать тип дженерика в рантайме.
+2. Нельзя создать класс типа параметра:
+   ```java
+   class Box<T> { T item = new T(); } // ошибка: компилятор не знает, что такое T
+   ```
+3. Перегрузка конфликтует на дженериках.
+
+### Сужение и расширение ссылочных типов
+
+- **Динамический полиморфизм** — поведение определяется реальным типом объекта.
+- **Правило компиляции:** смотрим на то, что написано **слева от `=`** — какие методы доступны.
+- **Правило выполнения:** смотрим на то, что написано **после `new`** — как реально отработает метод.
+
+```java
+Animal a = new Dog(); // компиляция — по Animal, выполнение — по Dog
+```
+
+### ClassCastException
+
+- Для **компиляции** смотрим по **левым частям** — приводится ли одно к другому.
+- Для **рантайма** смотрим **правые части** — нормально ли отработают.
+
+```java
+class Parent {}
+class Child1 extends Parent {}
+class Child2 extends Parent {}
+
+Parent p1 = new Child1();
+Child2 c2 = (Child2) p1; // компилируется, но падает в рантайме
+```
+
+### instanceof
+
+1. Если делаем `null` вместо объекта — будет выброшена ошибка.
+2. Безопасно делать сужение: в современной Java есть pattern matching.
+
+```java
+if (animal instanceof Dog dog) {
+    dog.bark();
+}
+```
+
+### Bridge-методы
+
+- **Причина появления:** в Java существует стирание типов (type erasure), из-за которого может возникнуть проблема с полиморфизмом.
+- **Суть проблемы:** после стирания типов сигнатуры методов в родителе и наследнике перестают совпадать, и вызов через ссылку родительского типа может не найти нужный метод.
+
+**Пример:**
+
+```java
+class Node<T> {
+    public void calculate(T obj) {
+        // do_something
+    }
+}
+
+class MyNode extends Node<String> {
+    public void calculate(String obj) {
+        // do_something
+    }
+}
+```
+
+В результате type erasure:
+- у `Node` метод становится `calculate(Object obj)`;
+- у `MyNode` остаётся `calculate(String obj)`.
+
+Это **разные сигнатуры**, но компилятор сам добавляет методы, которые связывают их. Эти методы называются **bridge-методами**.
+
+То есть в результате будет создан метод:
+
+```java
+calculate(Object obj) {
+    calculate((String) obj);
+}
+```
+
+**Цепочка вызовов:**
+
+```java
+Node<String> node = new MyNode();
+node.calculate("привет");
+```
+
+Вызов идёт так:
+
+```
+MyNode.calculate(Object obj) -> MyNode.calculate(String obj)
+```
+
+- **Для различия в типе возвращаемого значения** также существуют bridge-методы.
+
 ---
+
 
 ## 2.5. Исключения
 
