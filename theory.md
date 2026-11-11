@@ -113,10 +113,29 @@ Animal a = new Dog(); // компиляция — по Animal, выполнен�
 ### toString(), clone() (shallow vs deep)
 
 - **toString()** — возвращает строковое представление объекта. По умолчанию: `ClassName@hashCode`.
+Переопределение toString() помогает при отладке и выводе логов, без переопределения не информативно
 - **clone()** — создаёт копию объекта.
   - **Shallow copy** — копируются ссылки на вложенные объекты.
+    При изменении вложенного объекта через клон, измения применятся и к оригинальному объекту
   - **Deep copy** — рекурсивно копируются все вложенные объекты.
+    ```java
+    public class Person implements Cloneable {
+    private String name;
+    private int scores; // массив — это особый случай: массивы в Java реализуют Cloneable нативно 
 
+    @Override
+    public Person clone() throws CloneNotSupportedException {
+        try {
+            Person copy = (Person) super.clone(); // Создаём поверхностную копию
+            copy.scores = scores.clone(); // Рекурсивно клонируем массив
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e); // Это невозможно, так как класс реализует Cloneable
+        }
+    }
+    }
+    ```
+    Для того, чтобы класс мог создавать копию объектов, нужно переопределить clone() у интерфейса Cloneable.
 ---
 
 ### Абстрактный класс vs интерфейс (включая default/static методы)
