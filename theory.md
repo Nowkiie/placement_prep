@@ -155,6 +155,38 @@ Animal a = new Dog(); // компиляция — по Animal, выполнен�
 | Конструкторы | Есть | Нет |
 | Когда использовать | Общая логика + состояние | Контракт поведения |
 
+
+Интерфейс описывает какое-то умение объекта
+Абстрактный класс описывает общие характеристики объекта
+```java
+  // Абстрактный класс — описывает и состояние, и поведение
+public abstract class Shape {
+    protected String color; // общее состояние
+    public abstract double area(); // абстрактный метод
+    public void displayInfo() {
+        System.out.println("Цвет: " + color);
+    }
+}
+
+// Класс наследуется от абстрактного класса (отношение «is a»)
+class Circle extends Shape {
+    private double radius;
+    @Override
+    public double area() {
+        return Math.PI * radius * radius;
+    }
+}
+
+// Интерфейс — описывает только поведение
+public interface Drawable {
+    void draw();
+}
+
+// Разные классы реализуют один и тот же интерфейс
+class Circle implements Drawable { /* ... */ }
+class Rectangle implements Drawable { /* ... */ }
+```
+
 ---
 
 ### Вложенные, внутренние, анонимные классы, лямбды
